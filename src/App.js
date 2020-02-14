@@ -28,7 +28,7 @@ class App extends Component {
             {
               this.props.messages &&
               this.props.messages.map(item => (
-                  <Card>
+                  <Card key={item.id}>
                     <CardBody>
                       <CardTitle>
                         <h6>Author: {item.author? item.author : <i> Anonymous author</i>}</h6>
