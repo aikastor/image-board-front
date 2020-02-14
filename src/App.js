@@ -1,26 +1,65 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {Component} from 'react';
+import {Card, CardBody, CardText, CardTitle, Container, Nav, Navbar, NavbarBrand} from "reactstrap";
+import {NavLink as RouterNavLink} from 'react-router-dom';
+import NewMessage from "./containers/NewMessage/NewMessage";
+import {createMessage, fetchMessages} from "./store/actions/messagesActions";
+import {connect} from "react-redux";
+import ImageThumbnail from "./components/MessageImage/MessageImage";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+class App extends Component {
 
-export default App;
+  componentDidMount() {
+    this.props.fetchMessages()
+  }
+
+  createMessageHandler = async formData => {
+    await this.props.createMessage(formData);
+    this.props.fetchMessages()
+  };
+
+  render () {
+    return (
+        <>
+          <Navbar color="dark" dark expand="md">
+            <NavbarBrand tag={RouterNavLink} to='/'>Messages</NavbarBrand>
+            <Nav className="mr-auto" navbar></Nav>
+          </Navbar>
+          <Container>
+            {
+              this.props.messages &&
+              this.props.messages.map(item => (
+                  <Card>
+                    <CardBody>
+                      <CardTitle>
+                        <h6>Author: {item.author? item.author : <i> Anonymous author</i>}</h6>
+                      </CardTitle>
+                      {item.image !== 'null' ?
+                          <ImageThumbnail image={item.image}/>: null
+                      }
+                      <CardText>
+                        {item.message ? item.message : ''}
+                      </CardText>
+                    </CardBody>
+                  </Card>
+              ))
+            }
+            <NewMessage
+                onSubmit={this.createMessageHandler}
+            />
+          </Container>
+
+        </>
+    );
+  }
+
+};
+const mapStateToProps = state => ({
+  messages : state.messages,
+});
+
+const mapDispatchToProps = dispatch => ({
+  createMessage: (messageData) => dispatch(createMessage(messageData)),
+  fetchMessages: ()=> dispatch(fetchMessages()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
